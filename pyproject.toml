@@ -1,0 +1,25 @@
+[project]
+name = "fanpath"
+version = "0.1.0"
+description = "A multilingual, accessibility-aware navigation concierge for FIFA World Cup 2026 fans."
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# Google Python Style Guide-aligned rule set: pyflakes, pycodestyle,
+# import sorting, pep8-naming, bugbear, and simplify checks.
+select = ["E", "F", "I", "N", "B", "SIM", "UP"]
+ignore = [
+    "E501",  # line length is enforced by the formatter, not the linter
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra --strict-markers"

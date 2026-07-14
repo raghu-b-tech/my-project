@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FanPath — MetLife Stadium Concierge</title>
+<meta name="description" content="FanPath: a multilingual, accessibility-aware navigation concierge for FIFA World Cup 2026 fans at MetLife Stadium.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;900&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#message-input">Skip to message input</a>
+
+<div class="board-frame">
+
+  <header class="app-header">
+    <div class="wordmark" aria-hidden="true">FAN<span>PATH</span></div>
+    <p class="venue-line">MetLife Stadium · East Rutherford, NJ · FIFA World Cup 2026</p>
+  </header>
+
+  <main class="app-main">
+
+    <section class="context-strip" aria-label="Your context">
+      <div class="field">
+        <label for="language-select">Reply in</label>
+        <select id="language-select">
+          <option value="en" selected>English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="pt">Português</option>
+          <option value="ar">العربية</option>
+          <option value="de">Deutsch</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="zone-select">I'm near</label>
+        <select id="zone-select">
+          <option value="gate-a">Gate A — Southwest Plaza</option>
+          <option value="gate-c" selected>Gate C — Northwest Plaza</option>
+          <option value="gate-e">Gate E — Northeast Plaza</option>
+          <option value="gate-g">Gate G — Southeast Plaza</option>
+          <option value="section-101">Section 101</option>
+          <option value="section-238">Section 238</option>
+          <option value="section-347">Section 347</option>
+        </select>
+      </div>
+
+      <fieldset class="field access-field">
+        <legend>Accessibility needs</legend>
+        <label><input type="checkbox" name="access" value="wheelchair"> Wheelchair</label>
+        <label><input type="checkbox" name="access" value="low_vision"> Low vision</label>
+        <label><input type="checkbox" name="access" value="hard_of_hearing"> Hard of hearing</label>
+        <label><input type="checkbox" name="access" value="sensory_sensitivity" id="sensory-toggle"> Sensory-friendly mode</label>
+      </fieldset>
+    </section>
+
+    <section class="transcript-wrap">
+      <div class="transcript" id="transcript" aria-label="Conversation">
+        <div class="empty-state" id="empty-state">
+          <p>Ask anything about getting around the stadium. A few to try:</p>
+          <div class="suggestion-chips">
+            <button type="button" class="chip">Nearest accessible restroom?</button>
+            <button type="button" class="chip">Halal food nearby?</button>
+            <button type="button" class="chip">Is my gate busy right now?</button>
+            <button type="button" class="chip">Step-free route to my seat?</button>
+          </div>
+        </div>
+      </div>
+      <div id="sr-status" class="visually-hidden" role="status" aria-live="polite"></div>
+    </section>
+
+    <form class="chat-form" id="chat-form">
+      <label for="message-input" class="visually-hidden">Your question</label>
+      <textarea
+        id="message-input"
+        rows="1"
+        maxlength="2000"
+        placeholder="Where's the nearest accessible restroom?"
+        required></textarea>
+      <button type="button" id="mic-button" class="icon-button" aria-label="Ask by voice" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V21h2v-2.07A7 7 0 0 0 19 12h-2Z" fill="currentColor"/></svg>
+      </button>
+      <button type="submit" id="send-button">
+        Ask
+      </button>
+    </form>
+  </main>
+
+  <footer class="app-footer">
+    <p>Venue data shown here is illustrative demo data, not official MetLife Stadium or FIFA information.</p>
+  </footer>
+
+</div>
+
+<template id="user-message-template">
+  <article class="msg msg--user">
+    <p class="msg__body"></p>
+  </article>
+</template>
+
+<template id="assistant-message-template">
+  <article class="msg msg--assistant">
+    <header class="status-strip">
+      <span class="status-strip__category"></span>
+      <span class="status-strip__eta"></span>
+    </header>
+    <p class="msg__body"></p>
+  </article>
+</template>
+
+<template id="error-message-template">
+  <article class="msg msg--error" role="alert">
+    <p class="msg__body"></p>
+  </article>
+</template>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

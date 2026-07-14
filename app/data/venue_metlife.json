@@ -1,0 +1,105 @@
+{
+  "venue_id": "metlife-2026-final",
+  "name": "MetLife Stadium",
+  "city": "East Rutherford, New Jersey",
+  "note": "Sample data for demo purposes only. Gate layouts, walking times, and amenity positions are illustrative and NOT sourced from the venue operator or FIFA. Swap this file for a real feed to go to production.",
+  "zones": [
+    { "id": "gate-a", "name": "Gate A - Southwest Plaza", "level": "Concourse 1" },
+    { "id": "gate-c", "name": "Gate C - Northwest Plaza", "level": "Concourse 1" },
+    { "id": "gate-e", "name": "Gate E - Northeast Plaza", "level": "Concourse 1" },
+    { "id": "gate-g", "name": "Gate G - Southeast Plaza", "level": "Concourse 1" },
+    { "id": "section-101", "name": "Section 101", "level": "Concourse 1" },
+    { "id": "section-238", "name": "Section 238", "level": "Concourse 2" },
+    { "id": "section-347", "name": "Section 347", "level": "Concourse 3" }
+  ],
+  "amenities": [
+    {
+      "id": "rr-a1",
+      "category": "restroom",
+      "zone_id": "gate-a",
+      "name": "Restroom - Gate A Concourse",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 1, "gate-c": 6, "gate-e": 8, "gate-g": 7, "section-101": 2, "section-238": 5, "section-347": 9 }
+    },
+    {
+      "id": "rr-c1",
+      "category": "restroom",
+      "zone_id": "gate-c",
+      "name": "Restroom - Gate C Concourse",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 6, "gate-c": 1, "gate-e": 5, "gate-g": 8, "section-101": 4, "section-238": 2, "section-347": 7 }
+    },
+    {
+      "id": "rr-g1",
+      "category": "restroom",
+      "zone_id": "gate-g",
+      "name": "Restroom - Gate G Concourse",
+      "wheelchair_accessible": false,
+      "walking_minutes": { "gate-a": 7, "gate-c": 8, "gate-e": 6, "gate-g": 1, "section-101": 5, "section-238": 6, "section-347": 3 }
+    },
+    {
+      "id": "fa-c1",
+      "category": "first_aid",
+      "zone_id": "gate-c",
+      "name": "First Aid Station - Gate C",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 6, "gate-c": 1, "gate-e": 5, "gate-g": 8, "section-101": 4, "section-238": 2, "section-347": 7 }
+    },
+    {
+      "id": "food-a1",
+      "category": "food",
+      "zone_id": "gate-a",
+      "name": "Concourse Kitchen - Gate A",
+      "wheelchair_accessible": true,
+      "dietary_tags": ["halal", "vegetarian"],
+      "walking_minutes": { "gate-a": 1, "gate-c": 6, "gate-e": 8, "gate-g": 7, "section-101": 2, "section-238": 5, "section-347": 9 }
+    },
+    {
+      "id": "food-e1",
+      "category": "food",
+      "zone_id": "gate-e",
+      "name": "Northeast Grill - Gate E",
+      "wheelchair_accessible": true,
+      "dietary_tags": ["vegan", "vegetarian"],
+      "walking_minutes": { "gate-a": 8, "gate-c": 5, "gate-e": 1, "gate-g": 6, "section-101": 6, "section-238": 4, "section-347": 3 }
+    },
+    {
+      "id": "elev-c1",
+      "category": "elevator",
+      "zone_id": "gate-c",
+      "name": "Elevator Bank - Gate C",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 6, "gate-c": 1, "gate-e": 5, "gate-g": 8, "section-101": 4, "section-238": 2, "section-347": 7 }
+    },
+    {
+      "id": "elev-g1",
+      "category": "elevator",
+      "zone_id": "gate-g",
+      "name": "Elevator Bank - Gate G",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 7, "gate-c": 8, "gate-e": 6, "gate-g": 1, "section-101": 5, "section-238": 6, "section-347": 3 }
+    },
+    {
+      "id": "guest-a1",
+      "category": "guest_services",
+      "zone_id": "gate-a",
+      "name": "Fan Services Desk - Gate A",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 1, "gate-c": 6, "gate-e": 8, "gate-g": 7, "section-101": 2, "section-238": 5, "section-347": 9 }
+    },
+    {
+      "id": "transit-c1",
+      "category": "transit",
+      "zone_id": "gate-c",
+      "name": "NJ Transit Rail Link - Gate C Plaza",
+      "wheelchair_accessible": true,
+      "walking_minutes": { "gate-a": 6, "gate-c": 1, "gate-e": 5, "gate-g": 8, "section-101": 4, "section-238": 2, "section-347": 7 }
+    }
+  ],
+  "gate_status": {
+    "gate-a": { "congestion": "moderate", "wait_minutes": 8 },
+    "gate-c": { "congestion": "low", "wait_minutes": 3 },
+    "gate-e": { "congestion": "high", "wait_minutes": 17 },
+    "gate-g": { "congestion": "moderate", "wait_minutes": 9 }
+  }
+}

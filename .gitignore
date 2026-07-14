@@ -1,0 +1,30 @@
+# Secrets - never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+env/
+
+# Node (only relevant if any tooling adds it later - keeps the repo <10MB)
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Local scratch
+*.log
+.env.local
