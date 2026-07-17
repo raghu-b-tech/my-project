@@ -17,6 +17,7 @@ from tests.conftest import FakeGeminiClient
 
 @pytest.fixture
 def client(monkeypatch):
+    """A TestClient wrapping the real app, with GeminiClient swapped for a fake."""
     monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
 
     from app.config import get_settings

@@ -53,6 +53,7 @@ class SanitizedInput:
 
     @property
     def is_flagged(self) -> bool:
+        """Whether any injection pattern matched this input."""
         return len(self.flagged_reasons) > 0
 
 

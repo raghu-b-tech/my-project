@@ -15,7 +15,7 @@ import json
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 _DATA_PATH = Path(__file__).parent / "data" / "venue_metlife.json"
 
@@ -37,6 +37,14 @@ class Amenity:
     walking_minutes: dict[str, int]
 
     def minutes_from(self, zone_id: str) -> int | None:
+        """Looks up walking time from a zone, if this amenity is reachable from it.
+
+        Args:
+            zone_id: Zone to measure from, e.g. "gate-c".
+
+        Returns:
+            Walking time in minutes, or None if no route is recorded.
+        """
         return self.walking_minutes.get(zone_id)
 
 
@@ -59,7 +67,18 @@ class VenueNotLoadedError(RuntimeError):
 
 
 @lru_cache(maxsize=1)
-def _load_raw() -> dict:
+def _load_raw() -> dict[str, Any]:
+    """Loads and caches the venue JSON.
+
+    Cached with lru_cache since the file never changes at runtime - re-reading
+    it on every request would be pure waste.
+
+    Returns:
+        The parsed venue document.
+
+    Raises:
+        VenueNotLoadedError: If the file is missing or not valid JSON.
+    """
     try:
         with _DATA_PATH.open(encoding="utf-8") as f:
             return json.load(f)
@@ -67,7 +86,15 @@ def _load_raw() -> dict:
         raise VenueNotLoadedError(f"Could not load venue data from {_DATA_PATH}") from exc
 
 
-def _to_amenity(raw: dict) -> Amenity:
+def _to_amenity(raw: dict[str, Any]) -> Amenity:
+    """Converts one raw JSON amenity record into an Amenity.
+
+    Args:
+        raw: A single entry from the venue document's "amenities" list.
+
+    Returns:
+        The corresponding Amenity, with optional fields defaulted.
+    """
     return Amenity(
         id=raw["id"],
         category=raw["category"],
@@ -80,14 +107,17 @@ def _to_amenity(raw: dict) -> Amenity:
 
 
 def venue_name() -> str:
+    """Returns the display name of the loaded venue."""
     return _load_raw()["name"]
 
 
 def venue_city() -> str:
+    """Returns the city/region string of the loaded venue."""
     return _load_raw()["city"]
 
 
-def list_zones() -> list[dict]:
+def list_zones() -> list[dict[str, Any]]:
+    """Returns all zones (gates and sections) defined for the venue."""
     return list(_load_raw()["zones"])
 
 

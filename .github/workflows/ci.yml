@@ -26,6 +26,13 @@ jobs:
       - name: Format check (ruff)
         run: ruff format --check .
 
+      - name: Type check (mypy)
+        # Advisory for now: surfaces findings in the log without failing
+        # the build. Flip this off once a local `mypy app` run comes back
+        # clean and you're ready to make it a hard gate.
+        continue-on-error: true
+        run: mypy app
+
       - name: Test (pytest)
         env:
           GEMINI_API_KEY: ci-placeholder-key-not-real

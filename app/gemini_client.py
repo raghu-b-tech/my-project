@@ -29,6 +29,7 @@ import asyncio
 import logging
 import random
 from collections.abc import AsyncIterator
+from typing import Protocol
 
 from google import genai
 from google.genai import types
@@ -54,6 +55,18 @@ _SAFETY_SETTINGS = [
 ]
 
 
+class _TextChunk(Protocol):
+    """The one attribute of the SDK's response chunk this module relies on.
+
+    A structural type instead of importing the SDK's concrete response
+    class name: it documents exactly what this code depends on, and it
+    won't silently break in a future SDK version that renames or
+    restructures that class as long as `.text` still means the same thing.
+    """
+
+    text: str | None
+
+
 class GeminiUnavailableError(RuntimeError):
     """Raised when the Gemini API fails after exhausting all retries."""
 
@@ -74,10 +87,31 @@ def _backoff_seconds(attempt: int, base: float = 0.5, cap: float = 8.0) -> float
     return random.uniform(0, ceiling)
 
 
+def _is_retryable(status_code: int | None) -> bool:
+    """Decides whether a failed Gemini call is worth retrying.
+
+    Args:
+        status_code: HTTP-style status code from the failed call, or None
+            if the error didn't carry one.
+
+    Returns:
+        True for rate limiting and transient server errors; False for
+        anything else (bad request, auth failure, unknown model, etc.),
+        since retrying those would just waste the retry budget on a
+        failure that will happen again identically.
+    """
+    return status_code in _RETRYABLE_STATUS_CODES
+
+
 class GeminiClient:
     """Wraps `google.genai.Client` with retry, timeout, and safety config."""
 
     def __init__(self, settings: Settings) -> None:
+        """Builds the underlying SDK client once, at process startup.
+
+        Args:
+            settings: Validated application settings (see app/config.py).
+        """
         self._settings = settings
         self._client = genai.Client(
             api_key=settings.gemini_api_key,
@@ -85,6 +119,15 @@ class GeminiClient:
         )
 
     def _config(self, system_instruction: str) -> types.GenerateContentConfig:
+        """Builds the per-call generation config from settings.
+
+        Args:
+            system_instruction: Persona/behavior instructions for this call.
+
+        Returns:
+            A GenerateContentConfig with temperature, token cap, and
+            safety settings applied.
+        """
         return types.GenerateContentConfig(
             system_instruction=system_instruction,
             temperature=self._settings.gemini_temperature,
@@ -119,7 +162,23 @@ class GeminiClient:
                 "The connection to the assistant dropped partway through. Please try again."
             ) from exc
 
-    async def _connect_with_retry(self, prompt: str, system_instruction: str):
+    async def _connect_with_retry(
+        self, prompt: str, system_instruction: str
+    ) -> AsyncIterator[_TextChunk]:
+        """Opens the streaming call, retrying transient failures only here.
+
+        Args:
+            prompt: The fully-assembled, delimiter-guarded prompt.
+            system_instruction: Persona/behavior instructions for the model.
+
+        Returns:
+            The async stream of response chunks, once a connection attempt
+            succeeds.
+
+        Raises:
+            GeminiUnavailableError: If the failure isn't retryable, or every
+                retry attempt is exhausted.
+        """
         last_error: Exception | None = None
         for attempt in range(self._settings.gemini_max_retries):
             try:
@@ -131,7 +190,7 @@ class GeminiClient:
             except APIError as exc:
                 last_error = exc
                 status = getattr(exc, "code", None)
-                if status not in _RETRYABLE_STATUS_CODES:
+                if not _is_retryable(status):
                     raise GeminiUnavailableError(f"Gemini request failed: {exc}") from exc
                 delay = _backoff_seconds(attempt)
                 logger.info(

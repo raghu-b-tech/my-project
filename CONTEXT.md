@@ -18,7 +18,9 @@ at MetLife Stadium during FIFA World Cup 2026, built for the PromptWars
 2. **Keep the split.** `app/knowledge_base.py` answers deterministic
    "what/where" questions with plain Python - no LLM call. `app/assistant.py`
    is the only place that constructs a prompt and calls Gemini. Don't let
-   routes in `app/main.py` call `GeminiClient` directly.
+   routes in `app/main.py` call `GeminiClient` directly. Same logic applies
+   to anything with zero FastAPI dependency, like `app/rate_limiter.py` -
+   keep it that way so it stays testable without booting the app.
 
 3. **User input is data, never instructions.** Any new code path that puts
    user-supplied text into a prompt must go through
@@ -29,8 +31,14 @@ at MetLife Stadium during FIFA World Cup 2026, built for the PromptWars
 
 4. **Style.** Python follows the Google Python Style Guide: Google-style
    docstrings (Args/Returns/Raises), type hints on public functions,
-   snake_case functions/variables, PascalCase classes. Run `ruff format .`
-   and `ruff check .` before committing - don't hand-format.
+   snake_case functions/variables, PascalCase classes. This is enforced,
+   not just stated - `ruff`'s `select` list includes `D` (docstring
+   presence/format), so a new public function with no docstring fails
+   lint, it doesn't just look inconsistent later. Run `ruff format .` and
+   `ruff check .` before committing - don't hand-format. `mypy app` runs
+   in CI too (advisory for now - see README "Code quality" section for
+   why); tighten your own types until it's clean rather than adding
+   `# type: ignore`.
 
 5. **Tests are small by default.** A new function in `knowledge_base.py`,
    `security.py`, or `assistant.py` gets a small test (no network, no
@@ -52,7 +60,9 @@ at MetLife Stadium during FIFA World Cup 2026, built for the PromptWars
    submission - the hackathon rules require exactly one branch in the repo.
 
 ## Before you consider a change done
-- [ ] `ruff check . && ruff format --check .` passes
+- [ ] `ruff check . && ruff format --check .` passes (this now includes
+      docstring-presence checks - see rule 4)
+- [ ] `mypy app` has no new findings you can't explain
 - [ ] `pytest` passes
 - [ ] If you touched `app/data/venue_metlife.json`, the change is still
       clearly demo/illustrative data, not presented as real venue data

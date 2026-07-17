@@ -68,11 +68,29 @@ def _require(name: str) -> str:
 
 
 def _optional_float(name: str, default: float) -> float:
+    """Reads an optional float environment variable.
+
+    Args:
+        name: Environment variable name.
+        default: Value to use when the variable is unset or empty.
+
+    Returns:
+        The parsed float, or `default`.
+    """
     raw = os.environ.get(name)
     return float(raw) if raw else default
 
 
 def _optional_int(name: str, default: int) -> int:
+    """Reads an optional integer environment variable.
+
+    Args:
+        name: Environment variable name.
+        default: Value to use when the variable is unset or empty.
+
+    Returns:
+        The parsed int, or `default`.
+    """
     raw = os.environ.get(name)
     return int(raw) if raw else default
 

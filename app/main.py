@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import json
 import logging
-import time
-from collections import defaultdict
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
@@ -23,30 +22,10 @@ from app.assistant import TurnMeta, handle_turn
 from app.config import ConfigError, get_settings
 from app.gemini_client import GeminiClient, GeminiUnavailableError
 from app.models import ChatRequest, HealthResponse
+from app.rate_limiter import FixedWindowRateLimiter
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fanpath")
-
-
-class _FixedWindowRateLimiter:
-    """Per-client request cap over a rolling one-minute window.
-
-    Deliberately simple (in-memory, single-process) for a hackathon demo.
-    A multi-instance deployment would swap this for a shared store (e.g.
-    Redis) without touching any calling code - the interface is one method.
-    """
-
-    def __init__(self, limit_per_minute: int) -> None:
-        self._limit = limit_per_minute
-        self._hits: dict[str, list[float]] = defaultdict(list)
-
-    def allow(self, client_key: str) -> bool:
-        now = time.monotonic()
-        window_start = now - 60
-        hits = [t for t in self._hits[client_key] if t > window_start]
-        hits.append(now)
-        self._hits[client_key] = hits
-        return len(hits) <= self._limit
 
 
 @asynccontextmanager
@@ -59,7 +38,7 @@ async def lifespan(app: FastAPI):
         raise
     app.state.settings = settings
     app.state.gemini = GeminiClient(settings)
-    app.state.limiter = _FixedWindowRateLimiter(settings.rate_limit_per_minute)
+    app.state.limiter = FixedWindowRateLimiter(settings.rate_limit_per_minute)
     logger.info("FanPath ready - venue=%s model=%s", kb.venue_name(), settings.gemini_model)
     yield
 
@@ -70,15 +49,26 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", include_in_schema=False)
 async def index() -> FileResponse:
+    """Serves the single-page frontend."""
     return FileResponse("static/index.html")
 
 
 @app.get("/healthz", response_model=HealthResponse)
 async def healthz() -> HealthResponse:
+    """Liveness check - confirms the process is up and venue data loaded."""
     return HealthResponse(status="ok", venue=kb.venue_name())
 
 
-def _sse(event: str, data: dict) -> str:
+def _sse(event: str, data: dict[str, Any]) -> str:
+    """Formats one Server-Sent Events record.
+
+    Args:
+        event: SSE event name (e.g. "meta", "token", "done", "error").
+        data: JSON-serializable payload for this event.
+
+    Returns:
+        A complete SSE record, including the trailing blank line.
+    """
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
@@ -100,6 +90,7 @@ async def chat(request: ChatRequest, http_request: Request) -> StreamingResponse
     gemini = http_request.app.state.gemini
 
     async def event_stream():
+        """Runs one turn and formats each step as an SSE record."""
         try:
             async for item in handle_turn(
                 settings,

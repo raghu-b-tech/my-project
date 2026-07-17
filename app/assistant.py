@@ -19,6 +19,11 @@ from app.config import Settings
 from app.gemini_client import GeminiClient
 from app.security import build_guarded_prompt, sanitize_model_output, sanitize_user_input
 
+#: Used only when the client sends no `current_zone` (e.g. a fan hasn't
+#: picked one yet). Gate C is an arbitrary but central starting point in
+#: the demo dataset, not a claim about real foot traffic.
+_DEFAULT_ZONE = "gate-c"
+
 # (ui_category, keyword pattern, knowledge-base category)
 _ROUTES: tuple[tuple[str, re.Pattern[str], kb.Category | None], ...] = (
     ("LIVE", re.compile(r"\b(wait|line|queue|busy|crowd(ed)?|congest)", re.I), None),
@@ -55,6 +60,10 @@ class TurnMeta:
 
     Powers the UI's status-strip element and is fully unit-testable in
     isolation from anything that touches the network.
+
+    Attributes:
+        category: One of "NAVIGATE", "ACCESS", "LIVE", or "GENERAL".
+        eta_minutes: Walking time to the matched amenity, if any was found.
     """
 
     category: str
@@ -94,7 +103,7 @@ def gather_facts(
         plain-text facts to embed in the guarded prompt; `eta_minutes` is
         the walking time to the nearest match, if one was found.
     """
-    zone = current_zone or "gate-c"
+    zone = current_zone or _DEFAULT_ZONE
     accessible_only = "wheelchair" in accessibility_needs
 
     if kb_category is None:

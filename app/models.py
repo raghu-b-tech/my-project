@@ -46,5 +46,7 @@ class ChatRequest(BaseModel):
 
 
 class HealthResponse(BaseModel):
+    """Response body for GET /healthz."""
+
     status: str
     venue: str

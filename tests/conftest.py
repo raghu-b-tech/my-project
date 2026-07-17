@@ -42,6 +42,11 @@ class FakeGeminiClient:
         self.calls: list[tuple[str, str]] = []
 
     async def stream_reply(self, prompt: str, system_instruction: str) -> AsyncIterator[str]:
+        """Yields the canned reply word-by-word, or raises the canned error.
+
+        Records every call in `self.calls` so tests can assert on exactly
+        what prompt and system instruction the caller constructed.
+        """
         self.calls.append((prompt, system_instruction))
         if self.raises:
             raise self.raises
@@ -51,4 +56,5 @@ class FakeGeminiClient:
 
 @pytest.fixture
 def fake_gemini() -> FakeGeminiClient:
+    """A fresh FakeGeminiClient with default canned output for each test."""
     return FakeGeminiClient()

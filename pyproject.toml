@@ -10,16 +10,42 @@ target-version = "py311"
 
 [tool.ruff.lint]
 # Google Python Style Guide-aligned rule set: pyflakes, pycodestyle,
-# import sorting, pep8-naming, bugbear, and simplify checks.
-select = ["E", "F", "I", "N", "B", "SIM", "UP"]
+# import sorting, pep8-naming, bugbear, simplify, and docstring checks.
+select = ["E", "F", "I", "N", "B", "SIM", "UP", "D"]
 ignore = [
     "E501",  # line length is enforced by the formatter, not the linter
+    "D203",  # conflicts with D211 (Google style: no blank line before class docstring)
+    "D213",  # conflicts with D212 (Google style: summary on the first line)
 ]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.ruff.lint.per-file-ignores]
+# Test names are the documentation here (e.g.
+# test_injection_attempts_are_flagged needs no docstring to restate its own
+# name) - Google's own testing guidance is to spend effort on test clarity
+# and behavior, not on documenting every individual case. Any docstring
+# that IS present (module/fixture/class level) is still format-checked.
+"tests/*" = ["D101", "D102", "D103"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-ra --strict-markers"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+strict_equality = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+# Google's own pytype was sunset for Python 3.12 (April 2026); mypy is the
+# established reference implementation among its suggested replacements,
+# so that's what this project uses. See README "Code quality" section.
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
